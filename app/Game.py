@@ -4,6 +4,7 @@ from pygraph.classes.graph import graph
 from pygraph.algorithms.heuristics.chow import chow
 from pygraph.classes.exceptions import NodeUnreachable
 
+
 class Game(object):
     snake = {}
     turn = 0
@@ -24,15 +25,15 @@ class Game(object):
             board = self.make_board(data["snakes"])
             foods = [tuple(node) for node in data["food"]]
 
+            # PRIORITIES
+            # DON'T GET KILLED
+            # DON'T TRAP YOURSELF
+
             # 1. Distances
             paths, distances = self.a_star(foods, board)
-            total = float(reduce(lambda a, b: a + b, distances.values()))
-
-            print("CURRENT", self.snake["coords"], self.snake["coords"][0])
-            print(paths)
-            print(distances)
 
             # 1.1 Simulate another iteration. Is ther any food node close to another food node?
+            # maybe later
 
             # 2. Risk averse
             risks = dict(map(lambda f: (f, 1), foods))
@@ -42,14 +43,7 @@ class Game(object):
 
             # 4. Selection
             # distance/td * (Probability of being alive * Probability of kill)
-            scores = {}
-            for f in foods:
-                scores[f] = (distances[f]/total) * risks[f] * kills[f]
-
-            best = min(scores, key=scores.get)
-            next_move = self.next_direction(tuple(self.snake["coords"][0]), paths[best][0])
-            print(next_move)
-            print("\n\n")
+            next_move = self.select(foods, paths, distances, risks, kills)
         else:
             print("I'm dead. Turns played: %d" % self.turn)
         return next_move
@@ -138,9 +132,15 @@ class Game(object):
 
     @staticmethod
     def translate(data):
-        print(data)
         for i in range(0, len(data["snakes"])):
             data["snakes"][i]["coords"] = map(lambda l: [l[1], l[0]], data["snakes"][i]["coords"])
         data["food"] = map(lambda l: [l[1], l[0]], data["food"])
-        print(data)
         return data
+
+    def select(self, foods, paths, distances, risks, kills):
+        total = float(reduce(lambda a, b: a + b, distances.values()))
+        scores = {}
+        for f in foods:
+            scores[f] = (distances[f] / total) * risks[f] * kills[f]
+        best = min(scores, key=scores.get)
+        return self.next_direction(tuple(self.snake["coords"][0]), paths[best][0])
