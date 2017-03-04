@@ -1,7 +1,4 @@
-import pygraph
 from pygraph.classes.graph import graph
-from pygraph.classes.digraph import digraph
-from pygraph.algorithms.heuristics.euclidean import euclidean
 from pygraph.algorithms.heuristics.chow import chow
 from pygraph.classes import exceptions
 
@@ -15,31 +12,32 @@ class Game(object):
         self.height = data['height']
         self.width = data['width']
 
-    # Q1: does the board size change?
     def move(self, data):
         m = "up"
         if not self.is_dead(data["you"], data["dead_snakes"]):
             self.snake = self.get_snake(data["you"], data["snakes"])
             self.turn = data["turn"]
+            self.height = data["height"]
+            self.width = data["width"]
             board = self.make_board(data["snakes"])
             food = data["food"]
         else:
             print("I'm dead. Turns played: %d" % self.turn)
         return m
 
-    def is_dead(self, snake_id, dead_snakes):
-        filtered = filter(lambda snake: snake["id"] == snake_id, dead_snakes)
-        return len(filtered) == 1
-
     def make_board(self, snakes):
         board = graph()
         obstacles = self.find_obstacles(snakes)
-        node = 0
         for i in range(0, self.height):
             for j in range(0, self.width):
                 if (i, j) not in obstacles:
-                    board.add_node(node)
-                node += 1
+                    board.add_node((i, j))
+                else:
+                    print("obstacle", (i, j))
+        for node in board.nodes():
+            for edge in self.neighbors(node, board):
+                if not board.has_edge(edge):
+                    board.add_edge(edge)
         return board
 
     def find_obstacles(self, snakes):
@@ -55,5 +53,20 @@ class Game(object):
         return obstacles
 
     @staticmethod
+    def is_dead(snake_id, dead_snakes):
+        filtered = filter(lambda snake: snake["id"] == snake_id, dead_snakes)
+        return len(filtered) == 1
+
+    @staticmethod
     def get_snake(snake_id, snakes):
         return [snake for snake in snakes if snake["id"] == snake_id][0]
+
+    @staticmethod
+    def neighbors(node, board):
+        directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+        result = []
+        for direction in directions:
+            neighbor = (node[0] + direction[0], node[1] + direction[1])
+            if board.has_node(neighbor):
+                result.append(neighbor)
+        return result
