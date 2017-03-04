@@ -1,4 +1,4 @@
-# battlesnake-python
+# battlesnake
 
 A simple [BattleSnake AI](http://battlesnake.io) written in Python. 
 
@@ -20,7 +20,7 @@ This AI client uses the [bottle web framework](http://bottlepy.org/docs/dev/inde
 
 2) Clone repo to your development environment:
 ```
-git clone git@github.com:username/battlesnake-python.git
+git clone git@github.com:jachinte/battlesnake.git
 ```
 
 3) Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
