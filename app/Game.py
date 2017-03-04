@@ -25,6 +25,7 @@ class Game(object):
             board = self.make_board(data["snakes"])
             foods = [tuple(node) for node in data["food"]]
 
+            # MINIMAX
             # PRIORITIES
             # DON'T GET KILLED
             # DON'T TRAP YOURSELF
