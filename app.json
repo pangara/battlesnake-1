@@ -1,7 +1,7 @@
 {
-  "name": "BattleSnake Python",
+  "name": "BattleSnake: Sneakey Sneakerson",
   "description": "A simple BattleSnake AI written in Python.",
-  "repository": "https://github.com/sendwithus/battlesnake-python",
+  "repository": "https://github.com/jachinte/battlesnake",
   "website": "http://battlesnake.io",
-  "keywords": ["battlesnake","sendwithus"]
+  "keywords": ["battlesnake"]
 }
