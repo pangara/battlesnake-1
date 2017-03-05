@@ -42,9 +42,14 @@ class Game(object):
             if self.snake["health_points"] >= self.lower_tolerance:
                 opponents = [snake for snake in data["snakes"] if snake["id"] != self.snake["id"]]
                 if opponents:
-                    risks = self.risk(paths, opponents)
-                    maximum = float(max(risks.values())) + 1  # we don't want to multiply by 0
-                    risks = {k: (maximum - v)/maximum for k, v in risks.items()}
+                    try:
+                        risks = self.risk(paths, opponents)
+                        maximum = float(max(risks.values())) + 1  # we don't want to multiply by 0
+                        risks = {k: (maximum - v)/maximum for k, v in risks.items()}
+                    except KeyError as e:
+                        print("UNKNOWN ERROR: %s" % e)
+                        risks = dict(map(lambda f: (f, 1), targets))
+                        pass
 
             print("PATHS", paths)
             print("RISKS", risks)
