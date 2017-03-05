@@ -8,6 +8,7 @@ from pygraph.classes.exceptions import NodeUnreachable
 class Game(object):
     snake = {}
     turn = 0
+    lower_tolerance = 30
 
     def __init__(self, data):
         self.game = data['game_id']
@@ -22,35 +23,51 @@ class Game(object):
             self.turn = data["turn"]
             self.height = data["height"]
             self.width = data["width"]
-            board = self.make_board(data["snakes"])
-            foods = [tuple(node) for node in data["food"]]
+            self.board = self.make_board(data["snakes"])
+            targets = [tuple(node) for node in data["food"]]
 
             # PRIORITIES
             # DON'T GET KILLED
             # DON'T TRAP YOURSELF
 
             # 1. Distances
-            paths, distances = self.a_star(foods, board)
+            paths, distances = self.a_star(targets)
 
             # 1.1 Simulate another iteration. Is ther any food node close to another food node?
+            # 1.2 Too eat more: detect food inside other food's path
             # maybe later
 
             # 2. Risk averse
-            risks = dict(map(lambda f: (f, 1), foods))
+            risks = dict(map(lambda f: (f, 1), targets))
+            if self.snake["health_points"] >= self.lower_tolerance:
+                opponents = [snake for snake in data["snakes"] if snake["id"] != self.snake["id"]]
+                if opponents:
+                    risks = self.risk(paths, opponents)
+                    maximum = float(max(risks.values())) + 1  # we don't want to multiply by 0
+                    risks = {k: (maximum - v)/maximum for k, v in risks.items()}
+
+            print("PATHS", paths)
+            print("RISKS", risks)
 
             # 3. Probability of kill
-            kills = dict(map(lambda f: (f, 1), foods))
+            # Useful to break ties
+            kills = dict(map(lambda f: (f, 1), targets))
 
             # 4. Selection
-            # distance/td * (Probability of being alive * Probability of kill)
-            next_move = self.select(foods, paths, distances, risks, kills)
+            next_move = self.select(targets, paths, distances, risks, kills)
+            print("NEXT", next_move)
         else:
             print("I'm dead. Turns played: %d" % self.turn)
         return next_move
 
     def make_board(self, snakes):
+        return self._board(self.find_obstacles(snakes))
+
+    def make_board_with_heads(self, snakes):
+        return self._board(self.find_obstacles(snakes, False))
+
+    def _board(self, obstacles):
         board = graph()
-        obstacles = self.find_obstacles(snakes)
         for i in range(0, self.height):
             for j in range(0, self.width):
                 if (i, j) not in obstacles:
@@ -61,7 +78,7 @@ class Game(object):
                     board.add_edge((node, neighbor))
         return board
 
-    def find_obstacles(self, snakes):
+    def find_obstacles(self, snakes, include_heads=True):
         obstacles = set()
         for snake in snakes:
             _id = snake["id"]
@@ -70,31 +87,54 @@ class Game(object):
             obstacles.update(
                 [
                     tuple(position) for position in _coordinates[1:]
+                    # don't add our snake's body if body == head
                     if not (_id == self.snake["id"] and _coordinates[0] == _coordinates[1])
+                    # when adding heads too, don't add the body if body == head
+                    and not (not include_heads and _coordinates[0] == _coordinates[1])
                 ]
             )
             # ignore shorter snakes' heads
             # a snake is not shorter than itself
-            shorter = len(snake["coords"]) < len(self.snake["coords"])  # is their snake shorter?
-            if not shorter and _id != self.snake["id"]:
-                obstacles.add(tuple(snake["coords"][0]))
+            if include_heads:
+                shorter = len(snake["coords"]) < len(self.snake["coords"])  # is their snake shorter?
+                if not shorter and _id != self.snake["id"]:
+                    obstacles.add(tuple(snake["coords"][0]))
         return obstacles
 
-    def a_star(self, foods, board):
-        heuristic = chow(*foods)
-        heuristic.optimize(board)
+    def a_star(self, targets):
         paths = {}
         distances = {}
-        for food in foods:
+        heuristic = chow(*targets)
+        heuristic.optimize(self.board)
+        for target in targets:
             try:
-                paths[food] = heuristic_search(board, tuple(self.snake["coords"][0]), food, heuristic)
-                paths[food] = paths[food][1:]
-                distances[food] = len(paths[food])
+                paths[target] = heuristic_search(self.board, tuple(self.snake["coords"][0]), target, heuristic)
+                paths[target] = paths[target][1:]  # remove first (current position)
+                distances[target] = len(paths[target])
             except NodeUnreachable as e:
-                distances[food] = sys.maxint
+                distances[target] = sys.maxint
                 print("UNREACHABLE: %s" % e)
                 pass
         return paths, distances
+
+    def risk(self, paths, snakes):
+        # for each point in a path, calculate distance to other snakes
+        # for each path, the score is the sum of all distances. greater is better
+        # return {path1: score, path2: score, ...}
+        board_with_heads = self.make_board_with_heads(snakes)
+        _heuristic = chow(*paths.keys())
+        _heuristic.optimize(board_with_heads)
+        return dict([(food, self._risk(_heuristic, board_with_heads, paths[food], snakes)) for food in paths.keys()])
+
+    def _risk(self, _heuristic, board_with_heads, path, snakes):
+        score = 0
+        for node in path:
+            for snake in snakes:
+                opponent_path = heuristic_search(
+                    board_with_heads, tuple(snake["coords"][0]), node, _heuristic)
+                # distance between the opponent's head and path point
+                score += len(opponent_path)
+        return score
 
     @staticmethod
     def is_dead(snake_id, dead_snakes):
@@ -124,7 +164,6 @@ class Game(object):
                 current_node[0] + directions[l][0],
                 current_node[1] + directions[l][1]
             )
-            print(r, r == next_node, next_node)
             if r == next_node:
                 label = l
                 break
@@ -137,10 +176,10 @@ class Game(object):
         data["food"] = map(lambda l: [l[1], l[0]], data["food"])
         return data
 
-    def select(self, foods, paths, distances, risks, kills):
+    def select(self, targets, paths, distances, risks, kills):
         total = float(reduce(lambda a, b: a + b, distances.values()))
         scores = {}
-        for f in foods:
+        for f in targets:
             scores[f] = (distances[f] / total) * risks[f] * kills[f]
         best = min(scores, key=scores.get)
         return self.next_direction(tuple(self.snake["coords"][0]), paths[best][0])
