@@ -51,9 +51,6 @@ class Game(object):
                         risks = dict(map(lambda f: (f, 1), targets))
                         pass
 
-            print("PATHS", paths)
-            print("RISKS", risks)
-
             # 3. Probability of kill
             # Useful to break ties
             kills = dict(map(lambda f: (f, 1), targets))
@@ -65,7 +62,6 @@ class Game(object):
                 print("UNKNOWN ERROR: %s" % e)
                 next_move = self.next_direction(tuple(self.snake["coords"][0]), paths[paths.keys()[0]][0])
                 pass
-            print("NEXT", next_move)
         else:
             print("I'm dead. Turns played: %d" % self.turn)
         return next_move
