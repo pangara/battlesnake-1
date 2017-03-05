@@ -130,9 +130,9 @@ class Game(object):
                 paths[target] = heuristic_search(self.board, tuple(self.snake["coords"][0]), target, heuristic)
                 paths[target] = paths[target][1:]  # remove first (current position)
                 distances[target] = len(paths[target])
-            except NodeUnreachable as e:
+            except Exception as e:
                 distances[target] = sys.maxint
-                print("UNREACHABLE: %s" % e)
+                print("ERROR %s" % e)
                 pass
         return paths, distances
 
