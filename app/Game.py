@@ -26,6 +26,19 @@ class Game(object):
             self.board = self.make_board(data["snakes"])
             targets = [tuple(node) for node in data["food"]]
 
+            if len(targets) < 5:
+                self.lower_tolerance = 90
+            elif len(targets) < 10:
+                self.lower_tolerance = 65
+            elif len(targets) < 15:
+                self.lower_tolerance = 40
+            elif len(targets) < 20:
+                self.lower_tolerance = 30
+            elif len(targets) < 25:
+                self.lower_tolerance = 20
+            else:
+                self.lower_tolerance = 10
+
             # PRIORITIES
             # DON'T GET KILLED
             # DON'T TRAP YOURSELF

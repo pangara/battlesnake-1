@@ -33,7 +33,7 @@ def move():
     print(data["game_id"], games)
     return {
         'move': games[data["game_id"]].move(data),
-        'taunt': 'Hasta la vista, baby'
+        'taunt': '[%d] Hasta la vista, baby' % games[data["game_id"]].lower_tolerance
     }
 
 
