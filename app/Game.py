@@ -59,7 +59,12 @@ class Game(object):
             kills = dict(map(lambda f: (f, 1), targets))
 
             # 4. Selection
-            next_move = self.select(targets, paths, distances, risks, kills)
+            try:
+                next_move = self.select(targets, paths, distances, risks, kills)
+            except KeyError as e:
+                print("UNKNOWN ERROR: %s" % e)
+                next_move = self.next_direction(tuple(self.snake["coords"][0]), paths[paths.keys()[0]][0])
+                pass
             print("NEXT", next_move)
         else:
             print("I'm dead. Turns played: %d" % self.turn)
