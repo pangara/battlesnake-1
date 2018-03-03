@@ -76,8 +76,11 @@ class Game(object):
                     try:
                         risks = self.risk(paths, opponents)
                         print "risks ------", risks
-                        maximum = float(max(risks.values())) + 1  # we don't want to multiply by 0
-                        print "maximum --- ", maximum
+                        if risks.values():
+                            maximum = float(max(risks.values())) + 1  # we don't want to multiply by 0
+                            print "maximum --- ", maximum
+                        else:
+                            maximum = 1
                         risks = {k: (maximum - v)/maximum for k, v in risks.items()}
                     except KeyError as e:
                         print("UNKNOWN ERROR: %s" % e)
