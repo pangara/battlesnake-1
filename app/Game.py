@@ -46,7 +46,7 @@ class Game(object):
             # list shorter snakes
             # list their possible moves
             # include those points as targets
-            self.lower_tolerance = 80
+            self.lower_tolerance = 75
             if opponents and self.snake["health"] >= self.lower_tolerance:
                 shorter_snakes = [snake for snake in opponents if len(snake["coords"]) < len(self.snake["coords"])-1]
                 if not shorter_snakes:
