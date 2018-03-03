@@ -100,7 +100,11 @@ class Game(object):
                 pass
         else:
             print("I'm dead. Turns played: %d" % self.turn)
-        return next_move
+        print "next move ---" , next_move
+        if next_move:
+            return next_move
+        else:
+            return 'up'
 
     def make_board(self, snakes):
         return self._board(self.find_obstacles(snakes))
