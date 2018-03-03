@@ -50,7 +50,7 @@ class Game(object):
             if opponents and self.snake["health"] >= self.lower_tolerance:
                 shorter_snakes = [snake for snake in opponents if len(snake["coords"]) < len(self.snake["coords"])]
                 if not shorter_snakes:
-                    self.lower_tolerance = 99
+                    self.lower_tolerance = 100
                 for snake in shorter_snakes:
                     head = snake["coords"][0]
                     neighbors = self.neighbors(head, self.board)
