@@ -46,20 +46,19 @@ class Game(object):
             # list shorter snakes
             # list their possible moves
             # include those points as targets
-            self.lower_tolerance = 75
+            self.lower_tolerance = 60
             if opponents and self.snake["health"] >= self.lower_tolerance:
                 shorter_snakes = [snake for snake in opponents if len(snake["coords"]) < len(self.snake["coords"])-1]
                 if not shorter_snakes:
                     self.lower_tolerance = 100
-                if shorter_snakes:
-                    for snake in shorter_snakes:
-                        head = snake["coords"][0]
-                        neighbors = self.neighbors(head, self.board)
-                        if snake["coords"][1] in neighbors:
-                            neighbors.remove(snake["coords"][1]) # remove the one in the body
-                        if self.snake["coords"][0] in neighbors:
-                            neighbors.remove(snake["coords"][1]) # remove our snakes body if it is in the way
-                        targets.extend(neighbors)
+                for snake in shorter_snakes:
+                    head = snake["coords"][0]
+                    neighbors = self.neighbors(head, self.board)
+                    if snake["coords"][1] in neighbors:
+                        neighbors.remove(snake["coords"][1]) # remove the one in the body
+                    if self.snake["coords"][0] in neighbors:
+                        neighbors.remove(self.snake["coords"][0]) # remove our snakes head if it is food
+                    targets.extend(neighbors)
 
             # PRIORITIES
             # DON'T GET KILLED
@@ -67,6 +66,7 @@ class Game(object):
 
             # 1. Distances
             paths, distances = self.a_star(targets)
+            print "paths -----", paths
 
             # 1.1 Simulate another iteration. Is ther any food node close to another food node?
             # 1.2 Too eat more: detect food inside other food's path
@@ -78,8 +78,10 @@ class Game(object):
                 if opponents:
                     try:
                         risks = self.risk(paths, opponents)
+                        print "risks ------", risks
                         if risks.values():
                             maximum = float(max(risks.values())) + 1  # we don't want to multiply by 0
+                            print "maximum --- ", maximum
                         else:
                             maximum = 1
                         risks = {k: (maximum - v)/maximum for k, v in risks.items()}
@@ -104,7 +106,14 @@ class Game(object):
 
         # Key errors here - see if the next move is a valid one
         # else go a safe direction
-        return next_move
+        possible_moves = ['up', 'down', 'left', 'right']
+        print "next move ---" , next_move
+        if next_move in possible_moves:
+            return next_move
+        else:
+            result = self.neighbors_from_grid(self.snake["coords"][0])
+            print result
+            return 'up'
 
     def make_board(self, snakes):
         return self._board(self.find_obstacles(snakes))
