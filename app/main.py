@@ -30,7 +30,6 @@ def start():
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    print "game id-------------", games[data["id"]].move(data)
     return {  
         'move': games[data["id"]].move(data),
         'taunt': 'Good ol sneakeys baaack'
