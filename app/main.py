@@ -13,8 +13,8 @@ def static(path):
 @bottle.post('/start')
 def start():
     data = bottle.request.json
+    data["id"] = data["game_id"]
     games[data["game_id"]] = Game(data)
-    print("here", games[data["game_id"]])
     head_url = '%s://%s/static/head.png' % (
         bottle.request.urlparts.scheme,
         bottle.request.urlparts.netloc
@@ -30,9 +30,8 @@ def start():
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    print(data["game_id"], games)
     return {
-        'move': games[data["game_id"]].move(data),
+        'move': games[data["id"]].move(data),
         'taunt': 'Hasta la vista, baby'
     }
 

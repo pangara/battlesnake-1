@@ -11,19 +11,19 @@ class Game(object):
     lower_tolerance = 30
 
     def __init__(self, data):
-        self.game = data['game_id']
+        self.game = data['id']
         self.height = data['height']
         self.width = data['width']
 
     def move(self, data):
         next_move = "up"
-        if not self.is_dead(data["you"], data["dead_snakes"]):
+        if not self.is_dead(data["you"]["id"], data["snakes"]["data"]):
             data = self.translate(data);
-            self.snake = self.get_snake(data["you"], data["snakes"])
+            self.snake = self.get_snake(data["you"]["id"], data["snakes"]["data"])
             self.turn = data["turn"]
             self.height = data["height"]
             self.width = data["width"]
-            self.board = self.make_board(data["snakes"])
+            self.board = self.make_board(data["snakes"]["data"])
             targets = [tuple(node) for node in data["food"]]
 
             if len(targets) < 5:
@@ -52,8 +52,8 @@ class Game(object):
 
             # 2. Risk averse
             risks = dict(map(lambda f: (f, 1), targets))
-            if self.snake["health_points"] >= self.lower_tolerance:
-                opponents = [snake for snake in data["snakes"] if snake["id"] != self.snake["id"]]
+            if self.snake["health"] >= self.lower_tolerance:
+                opponents = [snake for snake in data["snakes"]["data"] if snake["id"] != self.snake["id"]]
                 if opponents:
                     try:
                         risks = self.risk(paths, opponents)
@@ -156,9 +156,9 @@ class Game(object):
         return score
 
     @staticmethod
-    def is_dead(snake_id, dead_snakes):
-        filtered = filter(lambda snake: snake["id"] == snake_id, dead_snakes)
-        return len(filtered) == 1
+    def is_dead(snake_id, snakes):
+        filtered = filter(lambda snake: snake["id"] == snake_id, snakes)
+        return len(filtered) == 0
 
     @staticmethod
     def get_snake(snake_id, snakes):
@@ -190,9 +190,9 @@ class Game(object):
 
     @staticmethod
     def translate(data):
-        for i in range(0, len(data["snakes"])):
-            data["snakes"][i]["coords"] = map(lambda l: [l[1], l[0]], data["snakes"][i]["coords"])
-        data["food"] = map(lambda l: [l[1], l[0]], data["food"])
+        for i in range(0, len(data["snakes"]["data"])):
+            data["snakes"]["data"][i]["coords"] = map(lambda l: [l[1], l[0]], Game.snake_coords(data["snakes"]["data"][i]))
+        data["food"] = map(lambda l: [l[1], l[0]], Game.food_coords(data["food"]))
         return data
 
     def select(self, targets, paths, distances, risks, kills):
@@ -202,3 +202,12 @@ class Game(object):
             scores[f] = (distances[f] / total) * risks[f] * kills[f]
         best = min(scores, key=scores.get)
         return self.next_direction(tuple(self.snake["coords"][0]), paths[best][0])
+
+    @staticmethod
+    def snake_coords(snake):
+        return map(lambda item: [item["x"], item["y"]], snake["body"]["data"])
+
+    @staticmethod
+    def food_coords(food_list):
+        return map(lambda item: [item["x"], item["y"]], food_list["data"])
+
