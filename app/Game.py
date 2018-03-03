@@ -103,10 +103,12 @@ class Game(object):
 
         # Key errors here - see if the next move is a valid one
         # else go a safe direction
+        possible_moves = ['up', 'down', 'left', 'right']
         print "next move ---" , next_move
-        if next_move in ['up', 'down', 'left', 'right']:
+        if next_move in possible_moves:
             return next_move
         else:
+            print "snake coords" , self.snake["coords"][0], self.snake["coords"][1]
             return 'up'
 
     def make_board(self, snakes):
