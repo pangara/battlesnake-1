@@ -21,7 +21,7 @@ def start():
     )
     return {
         'color': '#BADA55',
-        'taunt': 'Hasta la vista, baby',
+        'taunt': 'from the sneakerson family of snakes',
         'head_url': head_url,
         'name': 'Sneakey Sneakerson'
     }

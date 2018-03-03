@@ -46,7 +46,7 @@ class Game(object):
             # list shorter snakes
             # list their possible moves
             # include those points as targets
-            self.lower_tolerance = 80
+            self.lower_tolerance = 60
             if opponents and self.snake["health"] >= self.lower_tolerance:
                 shorter_snakes = [snake for snake in opponents if len(snake["coords"]) < len(self.snake["coords"])]
                 if not shorter_snakes:
@@ -109,7 +109,8 @@ class Game(object):
         if next_move in possible_moves:
             return next_move
         else:
-            print "alertttttttttttttttttttttt"
+            result = self.neighbors_from_grid(self.snake["coords"][0])
+            print result
             return 'up'
 
     def make_board(self, snakes):
@@ -252,6 +253,7 @@ class Game(object):
         for f in targets:
             scores[f] = (distances[f] / total) * risks[f] * kills[f]
         best = min(scores, key=scores.get)
+        print paths[best][0]
         return self.next_direction(tuple(self.snake["coords"][0]), paths[best][0])
 
     @staticmethod
