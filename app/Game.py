@@ -46,17 +46,20 @@ class Game(object):
             # list shorter snakes
             # list their possible moves
             # include those points as targets
-            self.lower_tolerance = 80
+            self.lower_tolerance = 75
             if opponents and self.snake["health"] >= self.lower_tolerance:
-                shorter_snakes = [snake for snake in opponents if len(snake["coords"]) < len(self.snake["coords"])]
+                shorter_snakes = [snake for snake in opponents if len(snake["coords"]) < len(self.snake["coords"])-1]
                 if not shorter_snakes:
                     self.lower_tolerance = 100
-                for snake in shorter_snakes:
-                    head = snake["coords"][0]
-                    neighbors = self.neighbors(head, self.board)
-                    if snake["coords"][1] in neighbors:
-                        neighbors.remove(snake["coords"][1]) # remove the one in the body
-                    targets.extend(neighbors)
+                if shorter_snakes:
+                    for snake in shorter_snakes:
+                        head = snake["coords"][0]
+                        neighbors = self.neighbors(head, self.board)
+                        if snake["coords"][1] in neighbors:
+                            neighbors.remove(snake["coords"][1]) # remove the one in the body
+                        if self.snake["coords"][0] in neighbors:
+                            neighbors.remove(snake["coords"][1]) # remove our snakes body if it is in the way
+                        targets.extend(neighbors)
 
             # PRIORITIES
             # DON'T GET KILLED
@@ -75,7 +78,10 @@ class Game(object):
                 if opponents:
                     try:
                         risks = self.risk(paths, opponents)
-                        maximum = float(max(risks.values())) + 1  # we don't want to multiply by 0
+                        if risks.values():
+                            maximum = float(max(risks.values())) + 1  # we don't want to multiply by 0
+                        else:
+                            maximum = 1
                         risks = {k: (maximum - v)/maximum for k, v in risks.items()}
                     except KeyError as e:
                         print("UNKNOWN ERROR: %s" % e)
@@ -95,6 +101,9 @@ class Game(object):
                 pass
         else:
             print("I'm dead. Turns played: %d" % self.turn)
+
+        # Key errors here - see if the next move is a valid one
+        # else go a safe direction
         return next_move
 
     def make_board(self, snakes):
@@ -252,3 +261,5 @@ class Game(object):
         if x < 0 or x > width-1 or y < 0 or y > height-1:
             return False
         return True
+
+
