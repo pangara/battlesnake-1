@@ -253,7 +253,6 @@ class Game(object):
         for f in targets:
             scores[f] = (distances[f] / total) * risks[f] * kills[f]
         best = min(scores, key=scores.get)
-        print "best path here ", paths[best][0]
         return self.next_direction(tuple(self.snake["coords"][0]), paths[best][0])
 
     @staticmethod
