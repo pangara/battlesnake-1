@@ -8,7 +8,7 @@ from pygraph.classes.exceptions import NodeUnreachable
 class Game(object):
     snake = {}
     turn = 0
-    lower_tolerance = 30
+    lower_tolerance = 10
 
     def __init__(self, data):
         self.game = data['id']
