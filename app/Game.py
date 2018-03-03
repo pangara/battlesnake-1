@@ -64,10 +64,7 @@ class Game(object):
 
             # 1. Distances
             paths, distances = self.a_star(targets)
-            print "paths -----" , paths
-            #safety in case there is no path
-            if not paths:
-                #do something
+            print "paths -----", paths
 
             # 1.1 Simulate another iteration. Is ther any food node close to another food node?
             # 1.2 Too eat more: detect food inside other food's path
