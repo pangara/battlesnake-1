@@ -57,6 +57,8 @@ class Game(object):
                         neighbors = self.neighbors(head, self.board)
                         if snake["coords"][1] in neighbors:
                             neighbors.remove(snake["coords"][1]) # remove the one in the body
+                        if self.snake["coords"][0] in neighbors:
+                            neighbors.remove(snake["coords"][1]) # remove our snakes body if it is in the way
                         targets.extend(neighbors)
 
             # PRIORITIES
