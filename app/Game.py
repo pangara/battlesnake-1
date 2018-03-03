@@ -64,6 +64,10 @@ class Game(object):
 
             # 1. Distances
             paths, distances = self.a_star(targets)
+            print "paths -----" , paths
+            #safety in case there is no path
+            if not paths:
+                #do something
 
             # 1.1 Simulate another iteration. Is ther any food node close to another food node?
             # 1.2 Too eat more: detect food inside other food's path
@@ -108,8 +112,9 @@ class Game(object):
         if next_move in possible_moves:
             return next_move
         else:
-            print "snake coords" , self.snake["coords"][0], self.snake["coords"][1]
-            return 'up'
+            print "alertttttttttttttttttttttt"
+            self.next_direction(tuple(self.snake["coords"][0]), paths[best][0])
+            return 
 
     def make_board(self, snakes):
         return self._board(self.find_obstacles(snakes))
