@@ -111,9 +111,10 @@ class Game(object):
         if next_move in possible_moves:
             return next_move
         else:
-            result = self.neighbors_from_grid(self.snake["coords"][0])
-            print "result---",result
-            return 'up'
+            neighbors = self.neighbors_from_grid(self.snake["coords"][0])
+            if self.snake["coords"][1] in neighbors:
+                neighbors.remove(self.snake["coords"][1]) 
+            return neighbors[0]
 
     def make_board(self, snakes):
         return self._board(self.find_obstacles(snakes))
