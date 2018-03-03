@@ -20,6 +20,7 @@ class Game(object):
         if not self.is_dead(data["you"]["id"], data["snakes"]["data"]):
             data = self.translate(data);
             self.snake = self.get_snake(data["you"]["id"], data["snakes"]["data"])
+            self.snakes = data["snakes"]["data"]
             self.turn = data["turn"]
             self.height = data["height"]
             self.width = data["width"]
@@ -39,6 +40,24 @@ class Game(object):
             else:
                 self.lower_tolerance = 10
 
+            opponents = [snake for snake in data["snakes"]["data"] if snake["id"] != self.snake["id"]]
+
+            # IF NOT EATING
+            # list shorter snakes
+            # list their possible moves
+            # include those points as targets
+            self.lower_tolerance = 80
+            if opponents and self.snake["health"] >= self.lower_tolerance:
+                shorter_snakes = [snake for snake in opponents if len(snake["coords"]) < len(self.snake["coords"])]
+                if not shorter_snakes:
+                    self.lower_tolerance = 99
+                for snake in shorter_snakes:
+                    head = snake["coords"][0]
+                    neighbors = self.neighbors(head, self.board)
+                    if snake["coords"][1] in neighbors:
+                        neighbors.remove(snake["coords"][1]) # remove the one in the body
+                    targets.extend(neighbors)
+
             # PRIORITIES
             # DON'T GET KILLED
             # DON'T TRAP YOURSELF
@@ -53,7 +72,6 @@ class Game(object):
             # 2. Risk averse
             risks = dict(map(lambda f: (f, 1), targets))
             if self.snake["health"] >= self.lower_tolerance:
-                opponents = [snake for snake in data["snakes"]["data"] if snake["id"] != self.snake["id"]]
                 if opponents:
                     try:
                         risks = self.risk(paths, opponents)
@@ -86,6 +104,15 @@ class Game(object):
         return self._board(self.find_obstacles(snakes, False))
 
     def _board(self, obstacles):
+        # include possible moves for snakes that are longer or the same length
+        # for snake in self.snakes:
+        #     shorter = len(snake["coords"]) < len(self.snake["coords"])
+        #     if not shorter:
+        #         neighbors = self.neighbors_from_grid(snake["coords"][0])
+        #         if snake["coords"][1] in neighbors:
+        #             neighbors.remove(snake["coords"][1])
+        #         print(neighbors)
+        #         obstacles.update(neighbors)
         board = graph()
         for i in range(0, self.height):
             for j in range(0, self.width):
@@ -115,7 +142,7 @@ class Game(object):
             # ignore shorter snakes' heads
             # a snake is not shorter than itself
             if include_heads:
-                shorter = len(snake["coords"]) < len(self.snake["coords"])  # is their snake shorter?
+                shorter = len(snake["coords"]) < len(self.snake["coords"])
                 if not shorter and _id != self.snake["id"]:
                     obstacles.add(tuple(snake["coords"][0]))
         return obstacles
@@ -174,6 +201,15 @@ class Game(object):
                 result.append(neighbor)
         return result
 
+    def neighbors_from_grid(self, node):
+        directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+        result = []
+        for direction in directions:
+            neighbor = (node[0] + direction[0], node[1] + direction[1])
+            if neighbor[0] >= 0 and neighbor[0] < self.width and neighbor[1] >= 0 and neighbor[1] < self.height:
+                result.append(neighbor)
+        return result
+
     @staticmethod
     def next_direction(current_node, next_node):
         label = "up"
@@ -210,4 +246,11 @@ class Game(object):
     @staticmethod
     def food_coords(food_list):
         return map(lambda item: [item["x"], item["y"]], food_list["data"])
+
+    @staticmethod
+    def is_in_board(x, y, width, height):
+        if x < 0 or x > width-1 or y < 0 or y > height-1:
+            return False
+        return True
+
 
