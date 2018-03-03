@@ -113,8 +113,7 @@ class Game(object):
             return next_move
         else:
             print "alertttttttttttttttttttttt"
-            self.next_direction(tuple(self.snake["coords"][0]), paths[best][0])
-            return 
+            return 'up'
 
     def make_board(self, snakes):
         return self._board(self.find_obstacles(snakes))
