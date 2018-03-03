@@ -100,8 +100,11 @@ class Game(object):
                 pass
         else:
             print("I'm dead. Turns played: %d" % self.turn)
+
+        # Key errors here - see if the next move is a valid one
+        # else go a safe direction
         print "next move ---" , next_move
-        if next_move:
+        if next_move in ['up', 'down', 'left', 'right']:
             return next_move
         else:
             return 'up'
