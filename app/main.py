@@ -31,8 +31,7 @@ def start():
 def move():
     data = bottle.request.json
     return {  
-        'move': games[data["id"]].move(data),
-        'taunt': 'Good ol sneakeys baaack'
+        'move': games[data["id"]].move(data)
     }
 
 
