@@ -112,7 +112,7 @@ class Game(object):
             return next_move
         else:
             result = self.neighbors_from_grid(self.snake["coords"][0])
-            print result
+            print "result---",result
             return 'up'
 
     def make_board(self, snakes):
