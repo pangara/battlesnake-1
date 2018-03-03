@@ -30,9 +30,8 @@ def start():
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    move = games[data["id"]]
     move_data = 'up'
-    if move:
+    if data["id"]:
         move_data = games[data["id"]].move(data)
     return {  
         'move': move_data,
