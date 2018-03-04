@@ -58,7 +58,7 @@ class Game(object):
                         neighbors.remove(snake["coords"][1]) # remove the one in the body
                     if self.snake["coords"][0] in neighbors:
                         neighbors.remove(self.snake["coords"][0]) # remove our snakes head if it is food
-                    # targets.extend(neighbors)
+                    targets.extend(neighbors)
 
             # PRIORITIES
             # DON'T GET KILLED
