@@ -53,7 +53,7 @@ class Game(object):
                     self.lower_tolerance = 99
                 for snake in shorter_snakes:
                     head = snake["coords"][0]
-                    neighbors = self.neighbors(head, self.board)
+                    neighbors = self.neighbors_from_grid(head)
                     if snake["coords"][1] in neighbors:
                         neighbors.remove(snake["coords"][1]) # remove the one in the body
                     if self.snake["coords"][0] in neighbors:
